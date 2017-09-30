@@ -8,9 +8,8 @@ Author      : Chris Ranc
 #include "stm32l476xx.h"
 #include <stdint.h>
 
-// Initializes Timer1 to Respond to Input Events on PE11
+// Initializes Timer8 to Produce PWM 
 //
-// Input : Unsigned 16bit Prescaler Number to be applied to Timer1
 void TIM1_Init(uint16_t prescaler){
     // Making sure timer capture and control is
     // disabled before configurations are set
