@@ -52,9 +52,9 @@ int main(void){
     //char rxByte;
     int lower_bound,upper_bound;
     int length,b_index, index;
-    uint8_t select;
+    uint16_t pulse;
     unsigned int b_value, old_value = 0, delta;
-
+ 
     int bucket[101];
 
 
@@ -64,6 +64,13 @@ int main(void){
 
     // Main Loop
     while (1){
-        
+        USART_Read_String(buffer);
+        pulse = atoi((char *) buffer);
+
+        if (pulse < MIN_DUTY_CYCLE)
+            pulse = MIN_DUTY_CYCLE;
+        else if (pulse > MAX_DUTY_CYCLE)
+            pulse = MAX_DUTY_CYCLE;
+        PWM_CH1_set(pulse);
     }
 }

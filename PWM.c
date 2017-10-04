@@ -30,9 +30,9 @@ void PWM_init(void){
     TIM2->PSC = PRESCALER;
     TIM2->EGR = TIM_EGR_UG;
 
-    // Set PWM Duty Cycle of 20ms 
+    // Set PWM Period of 20ms 
     TIM2->ARR &= 0;
-    TIM2->ARR |= DUTY_CYCLE;
+    TIM2->ARR |= CYCLE_PERIOD;
 
     // Clear Capture/Compare Mode Register for Channels 1 & 2
     TIM2->CCMR1 &= 0;
@@ -42,8 +42,8 @@ void PWM_init(void){
     TIM2->CCMR1 |= 0x00006868;
 
     // Preset Capture Compare Register
-    TIM2->CCR1 = PRELOAD_PULSE_TIME;
-    TIM2->CCR2 = PRELOAD_PULSE_TIME;
+    TIM2->CCR1 = MIN_DUTY_CYCLE;
+    TIM2->CCR2 = MIN_DUTY_CYCLE;
     
     TIM2->CR1 |= TIM_CR1_ARPE;
     // Enable Timer 2
