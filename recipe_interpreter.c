@@ -9,17 +9,12 @@ void master_proces(recipe_process* proc1, recipe_process* proc2 ){
 }
 
 void process(recipe_process* proc){
-    switch(proc->cur_state){
-        case running :
-            eval_instr(proc);
-            break;
-        case user_cmd:
-            eval_user(proc);
-            break;
-        case paused :
-            break;
-        case recipe_end :
-            break;
+
+    if (proc->u_state == user_input){
+        proc->u_state = no_input;
+        eval_user(proc);
+    }else if (proc->p_state == running){
+        eval_instr(proc);
     }
 }
 
@@ -30,6 +25,7 @@ void eval_instr(recipe_process* proc){
 
     switch (opcode){
         case MOV:
+            mov(proc, instr_val);
             break;
         case WAIT:
             break;
@@ -37,10 +33,21 @@ void eval_instr(recipe_process* proc){
             break;
         case END_LOOP:
             break;
-        case RECIPE_END:
-            break;
         default:
             break;
+    }
+    if (opcode != RECIPE_END){
+        proc->current_instr++;
+    }
+}
+
+void mov(recipe_process * proc, uint8_t position){
+    uint32_t duty_cycle;
+
+    if (MIN_SERVO_POS <= position && position <= MAX_SERVO_POS ){
+        proc->servo_position = position;
+        duty_cycle = (uint32_t) (position * DUTY_CYCLE_INC + BASE_DUTY_CYCLE);
+        PWM_CH_Set(duty_cycle, proc->servo_channel);
     }
 }
 

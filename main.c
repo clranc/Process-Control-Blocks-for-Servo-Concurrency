@@ -59,7 +59,7 @@ int main(void){
 
 
     System_Clock_Init(); // Switch System Clock = 80 MHz
-    //UART2_Init();
+    UART2_Init();
     PWM_init();
 
     // Main Loop
@@ -71,6 +71,6 @@ int main(void){
             pulse = MIN_DUTY_CYCLE;
         else if (pulse > MAX_DUTY_CYCLE)
             pulse = MAX_DUTY_CYCLE;
-        PWM_CH1_set(pulse);
+        PWM_CH_set(pulse, CHANNEL1);
     }
 }
