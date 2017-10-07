@@ -24,7 +24,7 @@ void process(recipe_process* proc){
     }
 }
 
-void init_process(recipe_process* proc, char* recipe, enum pwm_ch ch){
+void init_process(recipe_process* proc, unsigned char* recipe, enum pwm_ch ch){
     proc->head_instr = recipe;
     proc->current_instr = recipe;
     proc->loop_cnt = 0;
@@ -35,9 +35,6 @@ void init_process(recipe_process* proc, char* recipe, enum pwm_ch ch){
 
     proc->servo_position = 0;
     proc->servo_channel = ch;
-    
-    mov(proc, 0);
-    mov_wait(proc);
 }
 
 void eval_instr(recipe_process* proc){
@@ -72,7 +69,7 @@ void mov(recipe_process* proc, uint8_t position){
 
     if (MIN_SERVO_POS <= position && position <= MAX_SERVO_POS ){
         proc->servo_position = position;
-        duty_cycle = (uint32_t) (position * DUTY_CYCLE_INC + BASE_DUTY_CYCLE);
+        duty_cycle = (uint32_t) ((position * DUTY_CYCLE_INC) + BASE_DUTY_CYCLE);
         PWM_CH_Set(duty_cycle, proc->servo_channel);
     }else {
         proc->p_state = error;
@@ -85,7 +82,7 @@ void set_wait(recipe_process* proc, uint8_t wait_time){
 
 void mov_wait(recipe_process* proc){
     proc->p_state = servo_running;
-    set_wait(proc, 2);
+    set_wait(proc, SERVO_WAIT_TIME);
 }
 
 void wait(recipe_process* proc, uint8_t wait_time){

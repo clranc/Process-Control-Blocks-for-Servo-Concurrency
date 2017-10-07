@@ -15,5 +15,5 @@ enum pwm_ch{
 
 #endif /* PWM_H */
 
-void PWM_init(void);
+void PWM_Init(void);
 void PWM_CH_Set(uint32_t pulse, enum pwm_ch ch);

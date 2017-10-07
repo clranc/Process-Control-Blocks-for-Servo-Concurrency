@@ -3,9 +3,14 @@
 
 #include <stdint.h>
 
+void PWM_Delay(uint32_t time) {
+    //uint32_t time = 100*us/7;
+    while(--time);
+}
+
 // Initialization Sub-Routine to Configure Timer 2
 // and Port A Pins 0 and 1 for PWM
-void PWM_init(void){
+void PWM_Init(void){
     // Timer 2 Disabled Before Configurations are Set
     TIM2->CCER &= ~(TIM_CCER_CC2E | TIM_CCER_CC1E);
 
@@ -53,7 +58,11 @@ void PWM_init(void){
 
     // Start Timer2  
     TIM2->CR1 |= TIM_CR1_CEN;
+
+    // delay for servo to get to initial position
+    PWM_Delay(25000000);
 }
+
 
 void PWM_CH_Set(uint32_t pulse, enum pwm_ch ch){
     switch (ch) {

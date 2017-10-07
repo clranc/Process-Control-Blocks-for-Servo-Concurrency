@@ -1,4 +1,5 @@
-
+//#ifndef RECIPE_INTERPRETER_H
+//#define RECIPE_INTERPRETER_H
 
 #include "PWM.h"
 
@@ -19,11 +20,10 @@
 #define MIN_SERVO_POS (uint8_t) 0
 #define MAX_SERVO_POS (uint8_t) 5
 
-// Servo PWM Values
+// Servo Values
 #define BASE_DUTY_CYCLE 400
 #define DUTY_CYCLE_INC 320
-
-// Recipes
+#define SERVO_WAIT_TIME 8
 
 enum process_state{
     processing,
@@ -32,12 +32,12 @@ enum process_state{
     paused,
     error,
     recipe_end
-}process_state;
+};
 
 enum user_state{
     user_input,
     no_input
-}user_state;
+};
 
 enum loop_state{
     looping,
@@ -60,6 +60,11 @@ typedef struct recipe_process
     uint8_t servo_position;
     enum pwm_ch servo_channel;
 }recipe_process;
+
+//#endif /* RECIPE_INTERPRETER_H */
+
+// Recipe Process Initalizer
+void init_process(recipe_process* proc, unsigned char*, enum pwm_ch ch);
 
 // Evaluation and Process Functions
 void process(recipe_process* proc);
