@@ -64,13 +64,15 @@ int main(void){
 
     // Main Loop
     while (1){
-        USART_Read_String(buffer);
-        pulse = atoi((char *) buffer);
+        
 
-        if (pulse < MIN_DUTY_CYCLE)
-            pulse = MIN_DUTY_CYCLE;
-        else if (pulse > MAX_DUTY_CYCLE)
-            pulse = MAX_DUTY_CYCLE;
-        PWM_CH_set(pulse, CHANNEL1);
+//        USART_Read_String(buffer);
+//        pulse = atoi((char *) buffer);
+//
+//        if (pulse < MIN_DUTY_CYCLE)
+//            pulse = MIN_DUTY_CYCLE;
+//        else if (pulse > MAX_DUTY_CYCLE)
+//            pulse = MAX_DUTY_CYCLE;
+//        PWM_CH_set(pulse, CHANNEL1);
     }
 }

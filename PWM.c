@@ -45,11 +45,13 @@ void PWM_init(void){
     TIM2->CCR1 = MIN_DUTY_CYCLE;
     TIM2->CCR2 = MIN_DUTY_CYCLE;
 
+    // Enable Auto-reload Preload
     TIM2->CR1 |= TIM_CR1_ARPE;
+
     // Enable Timer 2
     TIM2->CCER |= TIM_CCER_CC2E | TIM_CCER_CC1E;
 
-    // Start Timer2  and Enable Auto-reload Preload
+    // Start Timer2  
     TIM2->CR1 |= TIM_CR1_CEN;
 }
 
