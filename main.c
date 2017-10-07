@@ -4,12 +4,14 @@ Description : Main code for determining counting wave periods seen
 Authors     : Chris Ranc and Rohini Jayachandre
 */
 
-
 #include "stm32l476xx.h"
 #include "SysClock.h"
 #include "UART.h"
 #include "Timer.h"
 #include "PWM.h"
+#include "LED.h"
+#include "recipe_interpreter.h"
+#include "recipes.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -19,51 +21,62 @@ char RxComByte = 0;
 uint8_t buffer[BufferSize];
 char str[] = "Give Red LED control input (Y = On, N = off):\r\n";
 
-void delay(unsigned int cnt){
-    while(cnt){
-      cnt--;
+unsigned char recipe1 [] = POSITION_RECIPE;
+unsigned char recipe2 [] = REV_POSITION_RECIPE;
+
+recipe_process proc1;
+recipe_process proc2;
+
+void time_check(void){
+    if (TIM1_Has_Ended()){
+        if ((proc1.p_state == waiting || proc1.p_state == servo_running) &&
+            proc1.wait_cnt > 0){
+            proc1.wait_cnt--;
+        }
+        if ((proc2.p_state == waiting || proc2.p_state == servo_running) &&
+            proc2.wait_cnt > 0){
+            proc2.wait_cnt--;
+        }
     }
 }
 
-// POST Routine 
-void POST(void) {
-    int len;
-    TIM1_Start();
 
-    // Delay so there is enough time for the timer to recieve an event
-    delay(20000);
-    do{
-        if(TIM1_Has_Count()!= 0)
-            break;
-        else{
-            len = sprintf((char*)buffer, "\r\nYou messed up bro.  Press any key to try the POST again.");
-            USART_Write(USART2, buffer, len);
-            USART_Read(USART2);
-            USART_Write(USART2, (uint8_t *)0x7F, 1);
-        }
-    }while(1);
-
-    len = sprintf((char*)buffer, "\r\nPost was successfull\r\n");
-    USART_Write(USART2, buffer, len);
-    TIM1_Stop();
-}
 
 int main(void){
-    //char rxByte;
-    int lower_bound,upper_bound;
-    int length,b_index, index;
-    uint8_t select;
-    unsigned int b_value, old_value = 0, delta;
-
-    int bucket[101];
-
-
+    int cnt = 10;
     System_Clock_Init(); // Switch System Clock = 80 MHz
     //UART2_Init();
-    PWM_init();
+    PWM_Init();
+    TIM1_Init();
+    LED_Init();
 
+    Red_LED_On();
+    TIM1_Start();
+    init_process(&proc1, recipe2, CHANNEL1);
+    init_process(&proc2, recipe1, CHANNEL2);
     // Main Loop
     while (1){
-        
+        time_check();
+        process(&proc1);
+        process(&proc2);
+
+//        if (TIM1_Has_Ended()) {
+//            if (cnt > 0 )
+//                cnt--;
+//            else{
+//                Red_LED_Toggle();
+//                Green_LED_Toggle();
+//                cnt = 10;
+//            }
+//        }
+
+//        USART_Read_String(buffer);
+//        pulse = atoi((char *) buffer);
+//
+//        if (pulse < MIN_DUTY_CYCLE)
+//            pulse = MIN_DUTY_CYCLE;
+//        else if (pulse > MAX_DUTY_CYCLE)
+//            pulse = MAX_DUTY_CYCLE;
+//        PWM_CH_set(pulse, CHANNEL1);
     }
 }

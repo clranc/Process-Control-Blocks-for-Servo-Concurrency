@@ -3,9 +3,14 @@
 
 #include <stdint.h>
 
+void PWM_Delay(uint32_t time) {
+    //uint32_t time = 100*us/7;
+    while(--time);
+}
 
-//
-void PWM_init(void){
+// Initialization Sub-Routine to Configure Timer 2
+// and Port A Pins 0 and 1 for PWM
+void PWM_Init(void){
     // Timer 2 Disabled Before Configurations are Set
     TIM2->CCER &= ~(TIM_CCER_CC2E | TIM_CCER_CC1E);
 
@@ -30,35 +35,43 @@ void PWM_init(void){
     TIM2->PSC = PRESCALER;
     TIM2->EGR = TIM_EGR_UG;
 
-    // Set PWM Duty Cycle of 20ms 
+    // Set PWM Period of 20ms
     TIM2->ARR &= 0;
-    TIM2->ARR |= DUTY_CYCLE;
+    TIM2->ARR |= CYCLE_PERIOD;
 
     // Clear Capture/Compare Mode Register for Channels 1 & 2
     TIM2->CCMR1 &= 0;
 
-    // Configure Channel 1 & 2 on Timer 2 to PWM Mode 1 and to 
+    // Configure Channel 1 & 2 on Timer 2 to PWM Mode 1 and to
     // Enable Preload Mode for their Capture Compare Registers
     TIM2->CCMR1 |= 0x00006868;
 
     // Preset Capture Compare Register
-    TIM2->CCR1 = PRELOAD_PULSE_TIME;
-    TIM2->CCR2 = PRELOAD_PULSE_TIME;
-    
+    TIM2->CCR1 = MIN_DUTY_CYCLE;
+    TIM2->CCR2 = MIN_DUTY_CYCLE;
+
+    // Enable Auto-reload Preload
     TIM2->CR1 |= TIM_CR1_ARPE;
+
     // Enable Timer 2
     TIM2->CCER |= TIM_CCER_CC2E | TIM_CCER_CC1E;
-    
-    // Start Timer2  and Enable Auto-reload Preload
+
+    // Start Timer2  
     TIM2->CR1 |= TIM_CR1_CEN;
 
-} 
-
-void PWM_CH1_set(uint16_t pulse){
-   TIM2->CCR1 = pulse;
+    // delay for servo to get to initial position
+    PWM_Delay(25000000);
 }
 
-void PWM_CH2_set(uint16_t pulse){
-    TIM2->CCR2 = pulse;
-   
+
+void PWM_CH_Set(uint32_t pulse, enum pwm_ch ch){
+    switch (ch) {
+        case CHANNEL1 :
+            TIM2->CCR1 = pulse;
+            break;
+        case CHANNEL2 :
+            TIM2->CCR2 = pulse;
+        default:
+            break;
+    }
 }
