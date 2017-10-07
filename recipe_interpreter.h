@@ -23,11 +23,32 @@
 #define BASE_DUTY_CYCLE 400
 #define DUTY_CYCLE_INC 320
 
+// Recipes
+
+enum process_state{
+    processing,
+    servo_running,
+    waiting,
+    paused,
+    error,
+    recipe_end
+}process_state;
+
+enum user_state{
+    user_input,
+    no_input
+}user_state;
+
+enum loop_state{
+    looping,
+    not_looping
+};
+
 typedef struct recipe_process
 {
-    char* head_instr;
-    char* current_instr;
-    char* loop_instr;
+    unsigned char* head_instr;
+    unsigned char* current_instr;
+    unsigned char* loop_instr;
     char user_instr;
 
     uint8_t loop_cnt;
@@ -40,24 +61,6 @@ typedef struct recipe_process
     enum pwm_ch servo_channel;
 }recipe_process;
 
-enum process_state{
-    running,
-    waiting,
-    paused,
-    error,
-    recipe_end
-};
-
-enum user_state{
-    user_input,
-    no_input
-};
-
-enum loop_state{
-    looping,
-    not_looping
-};
-
 // Evaluation and Process Functions
 void process(recipe_process* proc);
 void eval_instr(recipe_process* proc);
@@ -65,6 +68,8 @@ void eval_user(recipe_process* proc);
 
 // Opcode related functions
 void mov(recipe_process* proc, uint8_t position);
+void set_wait(recipe_process* proc, uint8_t wait_time);
+void mov_wait(recipe_process* proc);
 void wait(recipe_process* proc, uint8_t wait_time);
 void loop(recipe_process* proc, uint8_t cnt);
 void end_loop(recipe_process* proc);

@@ -4,18 +4,18 @@
 #include <stdint.h>
 
 void process(recipe_process* proc){
-
     if (proc->u_state == user_input){
         proc->u_state = no_input;
         eval_user(proc);
     }else {
         switch (proc->p_state){
-            case running:
+            case processing:
                 eval_instr(proc);
                 break;
+            case servo_running:
             case waiting:
                 if (proc->wait_cnt == 0){
-                    proc->p_state = running;
+                    proc->p_state = processing;
                     eval_instr(proc);
                 }
             default:
@@ -24,29 +24,31 @@ void process(recipe_process* proc){
     }
 }
 
-void initProcess(recipe_process* proc, char* recipe, enum pwm_ch ch){
+void init_process(recipe_process* proc, char* recipe, enum pwm_ch ch){
     proc->head_instr = recipe;
     proc->current_instr = recipe;
     proc->loop_cnt = 0;
     proc->wait_cnt = 0;
-    proc->p_state = running;
+    proc->p_state = processing;
     proc->u_state = no_input;
+    proc->l_state = not_looping;
 
     proc->servo_position = 0;
     proc->servo_channel = ch;
     
     mov(proc, 0);
+    mov_wait(proc);
 }
 
 void eval_instr(recipe_process* proc){
-    char instr = *(proc->current_instr); 
+    unsigned char instr = *(proc->current_instr); 
     uint8_t opcode = getInstrOpCode(instr);
     uint8_t instr_val = getInstrVal(instr);
 
     switch (opcode){
         case MOV:
             mov(proc, instr_val);
-            wait(proc, 2);
+            mov_wait(proc);
             break;
         case WAIT:
             wait(proc, instr_val);
@@ -77,15 +79,26 @@ void mov(recipe_process* proc, uint8_t position){
     }
 }
 
-void wait(recipe_process* proc, uint8_t wait_time){
-    if (proc.loop_cnt > 0){
-        
-    }
+void set_wait(recipe_process* proc, uint8_t wait_time){
     proc->wait_cnt = wait_time;
+}
+
+void mov_wait(recipe_process* proc){
+    proc->p_state = servo_running;
+    set_wait(proc, 2);
+}
+
+void wait(recipe_process* proc, uint8_t wait_time){
     proc->p_state = waiting;
+    set_wait(proc, wait_time);
 }
 
 void loop(recipe_process* proc, uint8_t cnt){
+    if (proc->l_state == looping){
+        proc->p_state = error;
+        return;
+    }
+    proc->l_state = looping;
     proc->loop_instr = proc->current_instr;
     proc->loop_cnt = cnt;
 }
@@ -94,12 +107,14 @@ void end_loop(recipe_process* proc){
     if (proc->loop_cnt > 0){
         proc->current_instr = proc->loop_instr;
         proc->loop_cnt--;
+        return;
     }
+    proc->l_state = not_looping;
 }
 
 void eval_user(recipe_process* proc){
     char cmd = proc->user_instr;
-    
+
     // Pause
     if (cmd == 'p' || cmd == 'P'){
 
