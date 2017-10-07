@@ -1,7 +1,7 @@
 /*
 File        : Timer.c
-Description : Routines for initalizing and using Timer1 for determining
-              the period of square waves
+Description : Routines for initalizing and using Timer1 for
+              downcounting 
 Author      : Chris Ranc
 */
 #include "Timer.h"
@@ -9,8 +9,6 @@ Author      : Chris Ranc
 #include <stdint.h>
 
 void TIM1_Init(void){
-
-    // Timer Configuration:
     // Enable Peripheral Clock for Timer 1
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
 
@@ -22,16 +20,11 @@ void TIM1_Init(void){
     TIM1->EGR = TIM_EGR_UG;
 
     // Set Auto reload register
-    TIM1->ARR = COUNT_DOWN
+    TIM1->ARR = COUNT_DOWN;
 
-    // Configure Timer for Downcounting and Auto reloading
+    // Configure Timer for Downcounting and Auto Reloading
     TIM1->CR1 |= TIM_CR1_DIR | TIM_CR1_ARPE;
-    
-}
 
-// Get Currently Stored Time
-unsigned int TIM1_Get_Time(void){
-    return ((unsigned int)TIM1->CCR2);
 }
 
 // Starts Timer 1
@@ -45,6 +38,11 @@ void TIM1_Stop(void){
 }
 
 // See If a Downcount has Finished
-int TIM1_Timer_Finish(void){
-    return (TIM_SR_UIF & TIM1->SR);
+int TIM1_Has_Ended(void){
+    if (TIM_SR_UIF & TIM1->SR){
+        TIM1->SR &= ~(TIM_SR_UIF);
+        return 1;
+    }else {
+        return 0;
+    }
 }
