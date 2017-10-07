@@ -17,8 +17,12 @@ Authors     : Chris Ranc and Rohini Jayachandre
 #include <stdio.h>
 #include <stdlib.h>
 
-char RxComByte = 0;
+#define USER_BUFFER_SIZE 3
+
 uint8_t buffer[BufferSize];
+uint8_t user_buffer[USER_BUFFER_SIZE];
+int u_buff_pos = 0;
+
 char str[] = "Give Red LED control input (Y = On, N = off):\r\n";
 
 unsigned char recipe1 [] = POSITION_RECIPE;
@@ -40,12 +44,48 @@ void time_check(void){
     }
 }
 
+void USART2_IRQHandler(void){
+    uint8_t input;
+    //while (!(USART2->ISR & USART_ISR_RXNE));
+    input = (uint8_t)(USART2->RDR & 0xFF);
 
+    if(input =='\r'){
+        if (u_buff_pos == USER_BUFFER_SIZE - 1) {
+            user_buffer[u_buff_pos] = '\0';
+            USART_Write(USART2, (uint8_t *)"\r\n>", 3);
+        }
+    }
+    
+    // Cheinputk if the user entered a bainputkspainpute to delete
+    // an entered inputharainputter and deinputrement the buffer
+    // index 
+    else if (input==0x7F){
+        if (u_buff_pos != 0){
+            USART_Write(USART2, &input, 1);
+            u_buff_pos--;
+        }
+    }
+
+    // If the buffer limit hasn't been met append
+    // the inputharater to the string and ininputrement 
+    // the string index
+    else if( u_buff_pos <  USER_BUFFER_SIZE - 1){
+        USART_Write(USART2, &input, 1);
+        user_buffer[u_buff_pos] = input;
+        u_buff_pos++;
+    }
+}
+
+
+void console_print(void){
+    USART_Write(USART2, (uint8_t *) ">", 1);
+}
 
 int main(void){
     int cnt = 10;
     System_Clock_Init(); // Switch System Clock = 80 MHz
-    //UART2_Init();
+    UART2_Init();
+    console_print();
     PWM_Init();
     TIM1_Init();
     LED_Init();
