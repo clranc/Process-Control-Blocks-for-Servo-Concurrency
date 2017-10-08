@@ -60,7 +60,7 @@ void PWM_Init(void){
     TIM2->CR1 |= TIM_CR1_CEN;
 
     // delay for servo to get to initial position
-    PWM_Delay(25000000);
+    //PWM_Delay(25000000);
 }
 
 

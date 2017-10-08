@@ -22,19 +22,39 @@ void process(recipe_process* proc){
                 break;
         }
     }
+
 }
 
 void init_process(recipe_process* proc, unsigned char* recipe, enum pwm_ch ch){
     proc->head_instr = recipe;
     proc->current_instr = recipe;
+
     proc->loop_cnt = 0;
     proc->wait_cnt = 0;
+
+    proc->d_state = is_paused;
+    proc->s_state = paused;
     proc->p_state = processing;
     proc->u_state = no_input;
     proc->l_state = not_looping;
 
     proc->servo_position = 0;
     proc->servo_channel = ch;
+
+    mov(proc, 0);
+}
+
+void reset_process(recipe_process* proc){
+    proc->current_instr = proc->head_instr;
+
+    proc->loop_cnt = 0;
+    proc->wait_cnt = 0;
+
+    proc->d_state = is_running;
+    proc->s_state = not_paused;
+    proc->p_state = processing;
+    proc->u_state = no_input;
+    proc->l_state = not_looping;
 }
 
 void eval_instr(recipe_process* proc){
@@ -56,7 +76,11 @@ void eval_instr(recipe_process* proc){
         case END_LOOP:
             end_loop(proc);
             break;
+        case RECIPE_END:
+            break;
         default:
+            proc->p_state = error;
+            proc->d_state = command_error;
             break;
     }
     if (opcode != RECIPE_END ){
@@ -73,6 +97,7 @@ void mov(recipe_process* proc, uint8_t position){
         PWM_CH_Set(duty_cycle, proc->servo_channel);
     }else {
         proc->p_state = error;
+        proc->d_state = command_error;
     }
 }
 
@@ -93,6 +118,7 @@ void wait(recipe_process* proc, uint8_t wait_time){
 void loop(recipe_process* proc, uint8_t cnt){
     if (proc->l_state == looping){
         proc->p_state = error;
+        proc->d_state = nested_loop_error;
         return;
     }
     proc->l_state = looping;
@@ -110,30 +136,61 @@ void end_loop(recipe_process* proc){
 }
 
 void eval_user(recipe_process* proc){
-    char cmd = proc->user_instr;
+    uint8_t cmd = proc->user_instr;
+    enum user_state state_u = proc->u_state;
+    enum pause_state state_s = proc->s_state;
+    proc->u_state = no_input;
 
+    switch (cmd) {
     // Pause
-    if (cmd == 'p' || cmd == 'P'){
+    case 'P' :
+    case 'p' :
+        if (state_u != recipe_end && state_u != error &&
+            state_s == not_paused)
+            proc->s_state = paused;
+            proc->d_state = is_paused;
+        break;
 
     // Continue
-    }else if (cmd == 'c' || cmd == 'C'){
+    case'C' :
+    case'c' :
+        if (state_u != recipe_end && state_u != error &&
+            state_s == paused)
+            proc->s_state = not_paused;
+            proc->d_state = is_running;
+        break;
 
     // Move Right
-    }else if (cmd == 'r' || cmd == 'R'){
+    case 'R' :
+    case 'r' :
+        if (proc->servo_position < MAX_SERVO_POS && state_s == paused) {
+            mov(proc, ++(proc->servo_position));
+        }
+        break;
 
     // Move Left
-    }else if (cmd == 'l' || cmd == 'L'){
-
-    // No Operation
-    }else if (cmd == 'n' || cmd == 'N'){
+    case 'L' :
+    case 'l' :
+        if (proc->servo_position > MIN_SERVO_POS && state_s == paused)
+            mov(proc, --(proc->servo_position));
+        break;
 
     // Restart
-    }else if (cmd == 'b' || cmd == 'B'){
-
+    case 'B' :
+    case 'b' :
+        reset_process(proc);
+        process(proc);
+        break;
+    // No Operation
+    case 'N' :
+    case 'n' :
+        if (state_u != recipe_end && state_u != error &&
+            state_s == not_paused)
+            process(proc);
+        break;
     // Bad Command
-    }else {
-
+    default:
+        break;
     }
-
 }
 
