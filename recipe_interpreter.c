@@ -146,31 +146,33 @@ void eval_user(recipe_process* proc){
     case 'P' :
     case 'p' :
         if (state_u != recipe_end && state_u != error &&
-            state_s == not_paused)
+            state_s == not_paused){
             proc->s_state = paused;
             proc->d_state = is_paused;
+        }
         break;
 
     // Continue
     case'C' :
     case'c' :
         if (state_u != recipe_end && state_u != error &&
-            state_s == paused)
+            state_s == paused){
             proc->s_state = not_paused;
             proc->d_state = is_running;
-        break;
-
-    // Move Right
-    case 'R' :
-    case 'r' :
-        if (proc->servo_position < MAX_SERVO_POS && state_s == paused) {
-            mov(proc, ++(proc->servo_position));
         }
         break;
 
     // Move Left
     case 'L' :
     case 'l' :
+        if (proc->servo_position < MAX_SERVO_POS && state_s == paused) {
+            mov(proc, ++(proc->servo_position));
+        }
+        break;
+
+    // Move Right
+    case 'R' :
+    case 'r' :
         if (proc->servo_position > MIN_SERVO_POS && state_s == paused)
             mov(proc, --(proc->servo_position));
         break;

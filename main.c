@@ -24,8 +24,8 @@ int u_buff_pos = 0;
 
 char str[] = "Give Red LED control input (Y = On, N = off):\r\n";
 
-unsigned char recipe1 [] = WAIT_RECIPE;
-unsigned char recipe2 [] = WAIT_RECIPE;
+unsigned char recipe1 [] = DEMO_RECIPE;
+unsigned char recipe2 [] = BAD_INSTR_RECIPE;
 
 recipe_process proc1;
 recipe_process proc2;
