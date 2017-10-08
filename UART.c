@@ -30,8 +30,8 @@ void UART2_Init(void) {
     UART2_GPIO_Init();
     USART_Init(USART2);
 
-    //NVIC_SetPriority(USART2_IRQn, 0);            // Set Priority to 1
-    //NVIC_EnableIRQ(USART2_IRQn);                    // Enable interrupt of USART1 peripheral
+    NVIC_SetPriority(USART2_IRQn, 0);            // Set Priority to 1
+    NVIC_EnableIRQ(USART2_IRQn);                    // Enable interrupt of USART2 peripheral
 }
 
 void UART2_GPIO_Init(void) {
@@ -96,6 +96,7 @@ void USART_Init (USART_TypeDef * USARTx) {
 
     if (USARTx == USART2){
         USARTx->ICR |= USART_ICR_TCCF;
+        USARTx->CR1 |= USART_CR1_RXNEIE;
         USART1->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
 
