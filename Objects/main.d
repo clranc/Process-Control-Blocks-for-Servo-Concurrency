@@ -8,6 +8,10 @@
 .\objects\main.o: SysClock.h
 .\objects\main.o: UART.h
 .\objects\main.o: Timer.h
-.\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\main.o: PWM.h
+.\objects\main.o: LED.h
+.\objects\main.o: recipe_interpreter.h
+.\objects\main.o: PWM.h
+.\objects\main.o: recipes.h
 .\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

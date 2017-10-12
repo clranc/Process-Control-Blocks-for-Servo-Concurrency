@@ -1,3 +1,11 @@
+/*
+ * File        : PWM.h
+ * Description : Contains function prototypes and defines for configuring and 
+ *               utilizing Timer 2 for generating output PWM signals on PORT A
+ *               pins 0 and 1
+ * Author      : Chris Ranc
+ */
+
 #ifndef PWM_H
 #define PWM_H
 
@@ -8,6 +16,7 @@
 #define MIN_DUTY_CYCLE (uint16_t) 400
 #define MAX_DUTY_CYCLE (uint16_t) 2000
 
+// Enumerators for specifing channels on the timer configured for PWM
 enum pwm_ch{
     CHANNEL1,
     CHANNEL2

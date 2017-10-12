@@ -1,9 +1,10 @@
 /* 
-File        : Timer.h
-Description : Contains function Prototypes for configuring and 
-              utilizing Timer 1 for downcounting
-Author      : Chris Ranc
-*/
+ * File        : Timer.h
+ * Description : Contains Function Prototypes for configuring and 
+ *               utilizing Timer 1 for downcounting
+ * Author      : Chris Ranc
+ *
+ */
 
 #include <stdint.h>
 void TIM1_Init(void);

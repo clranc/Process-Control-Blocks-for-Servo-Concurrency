@@ -1,7 +1,14 @@
+/*
+ * File        : PWM.c
+ * Description : Routines for initializing and using Timer 2 for generating
+ *               output PWM signals on PORT A pins 0 and 1 
+ * Author      : Chris Ranc
+ */
 #include "PWM.h"
 #include "stm32l476xx.h"
 
 #include <stdint.h>
+
 
 void PWM_Delay(uint32_t time) {
     //uint32_t time = 100*us/7;
@@ -58,12 +65,9 @@ void PWM_Init(void){
 
     // Start Timer2  
     TIM2->CR1 |= TIM_CR1_CEN;
-
-    // delay for servo to get to initial position
-    //PWM_Delay(25000000);
 }
 
-
+// Set the Duty Cycle of One of the Configured Output Channels
 void PWM_CH_Set(uint32_t pulse, enum pwm_ch ch){
     switch (ch) {
         case CHANNEL1 :

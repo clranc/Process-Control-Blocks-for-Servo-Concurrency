@@ -158,39 +158,39 @@ void USART_IRQHandler(USART_TypeDef * USARTx, uint8_t *buffer, uint32_t * pRx_co
 }
 
 // Reads string input from user
-int USART_Read_String(uint8_t * a)
+int USART_Read_String(uint8_t * buffer)
 {
-    uint8_t c;
-    int i = 0;
+    uint8_t input_char;
+    int index = 0;
     while(1) {
         // Get Character
-        c = USART_Read(USART2);
+        input_char = USART_Read(USART2);
 
         // See if the user hit the enter key to finish
         // the string and null terminate it.
-        if(c =='\r'){
-            a[i] = '\0';
+        if(input_char =='\r'){
+            buffer[index] = '\0';
             USART_Write(USART2, (uint8_t *)"\r\n", 2);
-            return i;
+            return index;
         }
         
         // Check if the user entered a backspace to delete
         // an entered character and decrement the buffer
         // index 
-        else if (c==0x7F){
-            if (i != 0){
-                USART_Write(USART2, &c, 1);
-                i--;
+        else if (input_char == 0x7F){
+            if (index != 0){
+                USART_Write(USART2, &input_char, 1);
+                index--;
             }
         }
         
         // If the buffer limit hasn't been met append
         // the charater to the string and increment 
         // the string index
-        else if( i < BufferSize - 1){
-            USART_Write(USART2, &c, 1);
-            a[i] = c;
-            i++;
+        else if( index < BufferSize - 1){
+            USART_Write(USART2, &input_char, 1);
+            buffer[index] = input_char;
+            index++;
         }
     }
 }

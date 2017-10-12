@@ -1,4 +1,10 @@
-
+/*
+ * File        : recipe_interpreter.h
+ * Description : Contains Function Prototypes and macros for
+ *               configuring and processing servo recipes 
+ *               contained in a Process Control Block
+ * Author      : Chris Ranc
+ */
 #include "PWM.h"
 
 #include <stdint.h>
@@ -18,12 +24,12 @@
 #define MIN_SERVO_POS (uint8_t) 0
 #define MAX_SERVO_POS (uint8_t) 5
 
-// Servo Values
-//#endif /* RECIPE_INTERPRETER_H */
+// Servo Management Values
 #define BASE_DUTY_CYCLE 400
 #define DUTY_CYCLE_INC 320
 #define SERVO_WAIT_TIME 8
 
+// Process States
 enum process_state{
     processing,
     servo_running,
@@ -32,21 +38,25 @@ enum process_state{
     recipe_end
 };
 
+// Process Pause States
 enum pause_state{
     paused,
     not_paused
 };
 
+// Process User Input States
 enum user_state{
     user_input,
     no_input
 };
 
+//  Process Loop States
 enum loop_state{
     looping,
     not_looping,
 };
 
+// Process LED Display States
 enum led_state{
     is_running,
     is_paused,
@@ -54,6 +64,7 @@ enum led_state{
     command_error
 };
 
+// Recipe Process Struct
 typedef struct recipe_process
 {
     unsigned char* head_instr;

@@ -1,13 +1,15 @@
 /*
-File        : Timer.c
-Description : Routines for initalizing and using Timer1 for
-              downcounting 
-Author      : Chris Ranc
-*/
+ * File        : Timer.c
+ * Description : Routines for initalizing and using Timer1 for
+ *               downcounting 
+ * Author      : Chris Ranc
+ */
 #include "Timer.h"
 #include "stm32l476xx.h"
 #include <stdint.h>
 
+
+// Initializes Timer 1 for Downcounting
 void TIM1_Init(void){
     // Enable Peripheral Clock for Timer 1
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
@@ -37,7 +39,7 @@ void TIM1_Stop(void){
     TIM1->CR1 &= ~(TIM_CR1_CEN);
 }
 
-// See If a Downcount has Finished
+// See if a Downcount has Finished
 int TIM1_Has_Ended(void){
     if (TIM_SR_UIF & TIM1->SR){
         TIM1->SR &= ~(TIM_SR_UIF);

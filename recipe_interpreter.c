@@ -1,8 +1,18 @@
+/*
+ * File : recipe_interpreter.c
+ * Description : Routines for configuring and processing servo recipes
+ *               in a Process Control Block
+ * Author : Chris Ranc
+ */
+
 #include "recipe_interpreter.h"
 #include "PWM.h"
 
 #include <stdint.h>
 
+// Processes the Current State of the Recipe Process Control Block
+// and Evaluate the Next Instruction or the Entered User Input to
+// Determine the State
 void process(recipe_process* proc){
     if (proc->u_state == user_input){
         proc->u_state = no_input;
@@ -25,6 +35,9 @@ void process(recipe_process* proc){
 
 }
 
+
+// Initialize Recipe Process Control Block with Recipe and Starting States
+// of which is to begin as paused
 void init_process(recipe_process* proc, unsigned char* recipe, enum pwm_ch ch){
     proc->head_instr = recipe;
     proc->current_instr = recipe;
@@ -44,6 +57,8 @@ void init_process(recipe_process* proc, unsigned char* recipe, enum pwm_ch ch){
     mov(proc, 0);
 }
 
+// Reset Recipe Process Block to Begin at First Instruction
+// and to be in the Running State Immediatley
 void reset_process(recipe_process* proc){
     proc->current_instr = proc->head_instr;
 
@@ -57,8 +72,9 @@ void reset_process(recipe_process* proc){
     proc->l_state = not_looping;
 }
 
+// Evaluate and Apply Operation of Recipe Instruction
 void eval_instr(recipe_process* proc){
-    unsigned char instr = *(proc->current_instr); 
+    unsigned char instr = *(proc->current_instr);
     uint8_t opcode = getInstrOpCode(instr);
     uint8_t instr_val = getInstrVal(instr);
 
@@ -88,6 +104,7 @@ void eval_instr(recipe_process* proc){
     }
 }
 
+// Move Servo Specified in Recipe Process Block
 void mov(recipe_process* proc, uint8_t position){
     uint32_t duty_cycle;
 
@@ -101,20 +118,28 @@ void mov(recipe_process* proc, uint8_t position){
     }
 }
 
+// Set Wait Count of Recipe Process Block
 void set_wait(recipe_process* proc, uint8_t wait_time){
     proc->wait_cnt = wait_time;
 }
 
+// Set Wait Count and State Conditions of Recipe Process Block
+// for when the Servo is Moving
 void mov_wait(recipe_process* proc){
     proc->p_state = servo_running;
     set_wait(proc, SERVO_WAIT_TIME);
 }
 
+// Set Wait Count and State Conditions of Recipe Process Block
+// for When the Servo is to wait and not move
 void wait(recipe_process* proc, uint8_t wait_time){
     proc->p_state = waiting;
     set_wait(proc, wait_time);
 }
 
+// Configure Recipe Process Control Block to Exhibit Loop
+// Behaviour by Storing the Start Loop Addresss and the
+// Amount of repetitions to occur
 void loop(recipe_process* proc, uint8_t cnt){
     if (proc->l_state == looping){
         proc->p_state = error;
@@ -126,6 +151,8 @@ void loop(recipe_process* proc, uint8_t cnt){
     proc->loop_cnt = cnt;
 }
 
+// Loop Back to Initial Loop Address and Decrement Loop Count
+// or Set Recipe Process Block State to No Longer Looping
 void end_loop(recipe_process* proc){
     if (proc->loop_cnt > 0){
         proc->current_instr = proc->loop_instr;
@@ -134,6 +161,18 @@ void end_loop(recipe_process* proc){
     }
     proc->l_state = not_looping;
 }
+
+// Evaluate User Input and Adjust Process State and 
+// Behaviour Based on User Input Commands
+// - p/P Pause Recipe if Not in an Error or End State
+// - c/C Continue Recipe if Paused and Not in an Error or End State
+// - l/L Move Servo Left Once if Paused and Not Outside of Possible
+//       Positions
+// - r/R Move Servo Right Once if Paused and Not Outside of Possible
+//       Positions
+// - b/B Reset Recipe Process Block to Beginning of Recipe and Begin 
+//       Running
+// - n/N No Operation and Continue to Process Recipe Process Control Block
 
 void eval_user(recipe_process* proc){
     uint8_t cmd = proc->user_instr;
