@@ -16,7 +16,7 @@
 #define MIN_DUTY_CYCLE (uint16_t) 400
 #define MAX_DUTY_CYCLE (uint16_t) 2000
 
-// Enumerators for specifing channels on the timer configured for PWM
+/* Enumerators for specifing channels on the timer configured for PWM */
 enum pwm_ch{
     CHANNEL1,
     CHANNEL2

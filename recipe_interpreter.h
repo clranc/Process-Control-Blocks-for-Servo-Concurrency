@@ -9,27 +9,27 @@
 
 #include <stdint.h>
 
-// Recipe OpCodes
+/* Recipe OpCodes */
 #define MOV        0x20
 #define WAIT       0x40
 #define LOOP       0x80
 #define END_LOOP   0xA0
 #define RECIPE_END 0x00
 
-// Instruction Parsers
+/* Instruction Parsers */
 #define getInstrOpCode(x) (uint8_t)(x & 0xE0)
 #define getInstrVal(x) (uint8_t)(x & 0x1F)
 
-// Servo Positions
+/* Servo Positions */
 #define MIN_SERVO_POS (uint8_t) 0
 #define MAX_SERVO_POS (uint8_t) 5
 
-// Servo Management Values
+/* Servo Management Values */
 #define BASE_DUTY_CYCLE 400
 #define DUTY_CYCLE_INC 320
 #define SERVO_WAIT_TIME 8
 
-// Process States
+/* Process States */
 enum process_state{
     processing,
     servo_running,
@@ -38,25 +38,25 @@ enum process_state{
     recipe_end
 };
 
-// Process Pause States
+/* Process Pause States */
 enum pause_state{
     paused,
     not_paused
 };
 
-// Process User Input States
+/* Process User Input States */
 enum user_state{
     user_input,
     no_input
 };
 
-//  Process Loop States
+/* Process Loop States */
 enum loop_state{
     looping,
     not_looping,
 };
 
-// Process LED Display States
+/* Process LED Display States */
 enum led_state{
     is_running,
     is_paused,
@@ -64,7 +64,7 @@ enum led_state{
     command_error
 };
 
-// Recipe Process Struct
+/* Recipe Process Struct */
 typedef struct recipe_process
 {
     unsigned char* head_instr;
@@ -84,16 +84,16 @@ typedef struct recipe_process
     enum pwm_ch servo_channel;
 }recipe_process;
 
-// Recipe Process Initalizer
+/* Recipe Process Initalizer */
 void init_process(recipe_process* proc, unsigned char*, enum pwm_ch ch);
 void reset_process(recipe_process* proc);
 
-// Evaluation and Process Functions
+/* Evaluation and Process Functions */
 void process(recipe_process* proc);
 void eval_instr(recipe_process* proc);
 void eval_user(recipe_process* proc);
 
-// Opcode related functions
+/* Opcode related functions */
 void mov(recipe_process* proc, uint8_t position);
 void set_wait(recipe_process* proc, uint8_t wait_time);
 void mov_wait(recipe_process* proc);

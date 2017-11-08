@@ -1,4 +1,4 @@
-// Recipes
+/* Recipes */
 #define DEMO_RECIPE {MOV | 0 ,\
                      MOV | 5,\
                      MOV | 0,\

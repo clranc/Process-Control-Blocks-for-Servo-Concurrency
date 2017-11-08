@@ -1,8 +1,9 @@
 /*
-Files       : Main.c
-Description : Main code for determining counting wave periods seen
-Authors     : Chris Ranc and Rohini Jayachandre
-*/
+ * Files       : Main.c
+ * Description : Main code for performing concurrent operation of servos while
+ *               handling user control input
+ * Authors     : Chris Ranc
+ */
 
 #include "stm32l476xx.h"
 #include "SysClock.h"
@@ -38,10 +39,10 @@ void time_check(void);
 void set_LED_servo1(void);
 void console_print(void);
 
-// Main Routine
+/* Main Routine */
 int main(void){
-    // Hardware and State Initialization
-    System_Clock_Init(); // Switch System Clock = 80 MHz
+    /* Hardware and State Initialization */
+    System_Clock_Init(); /* Switch System Clock = 80 MHz */
     UART2_Init();
     console_print();
     PWM_Init();
@@ -51,7 +52,7 @@ int main(void){
     init_process(&proc1, recipe1, CHANNEL1);
     init_process(&proc2, recipe2, CHANNEL2);
 
-    // Main Loop
+    /* Main Loop */
     while (1){
         set_LED_servo1();
         time_check();
@@ -60,25 +61,30 @@ int main(void){
     }
 }
 
-// UART Interrupt Request Handler to Process User Input.  If an Appropriate
-// Command Character has been Entered then it will be stored in the User
-// Command Buffer or be used to Determine Character Entry/Deletion.
+/* UART interrupt request handler to process user input.  If an accepted
+ * character has been entered then it will be stored in the user
+ * command buffer or be used to determine command entry/deletion.
+ */
 void USART2_IRQHandler(void){
     uint8_t input = (uint8_t)(USART2->RDR & 0xFF);
 
     if (valid_char(input)){
-        // Check if the User Sent a Carriage Return to Submit the
-        // Entered User Commands.  If 2 have been Loaded then they
-        // Will be Checked to see if Cancel Characters x/X have been
-        // Entered to Cancel and User Processing and Load for the
-        // next Command Entry. If no Cancel Characters have been
-        // Entered then they are Stored in the Process Control Block
-        // Along with Changing its State to Analyze to Process the
-        // Inout.
+        /* Check if the user sent a carriage return to attempt submitting
+         * the entered user commands.  
+         */
         if(input =='\r'){
+            /* If 2 have been loaded then they
+             * will be checked to see if cancel characters x/X have been
+             * entered to cancel user entered commands and reset the buffer and
+             * command line for next entry.
+             */
             if (u_buff_pos == USER_BUFFER_SIZE - 1) {
                 user_buffer[u_buff_pos] = '\0';
                 USART_Write(USART2, (uint8_t *)"\r\n>", 3);
+                /* If no cancel characters have been
+                 * entered then they are stored in the process control block
+                 * along with changing its state to process the the user input.
+                 */
                 if (user_buffer[0] != 'x' && user_buffer[0] != 'X' &&
                     user_buffer[1] != 'x' && user_buffer[1] != 'X'){
                     proc1.user_instr = user_buffer[0];
@@ -90,9 +96,10 @@ void USART2_IRQHandler(void){
             }
         }
 
-        // Check if the user entered a backspace to delete
-        // an entered character and decrement the buffer
-        // index
+        /* Check if the user entered a backspace to delete
+         * an entered character and decrement the buffer
+         * index
+         */
         else if (input==0x7F){
             if (u_buff_pos != 0){
                 USART_Write(USART2, &input, 1);
@@ -100,9 +107,10 @@ void USART2_IRQHandler(void){
             }
         }
 
-        // If the buffer limit hasn't been met append
-        // the character to the string and increment
-        // the string index
+        /* If the buffer limit hasn't been met append
+         * the character to the string and increment
+         * the string index
+         */
         else if( u_buff_pos <  USER_BUFFER_SIZE - 1){
             USART_Write(USART2, &input, 1);
             user_buffer[u_buff_pos] = input;
@@ -111,35 +119,37 @@ void USART2_IRQHandler(void){
     }
 }
 
-// Sees if the Entered User Character is Appropriate
-// as a Command or Deleting/Entering the Commands
+/* Sees if the entered user character is appropriate
+ * as a command or deleting/entering the commands
+ */
 int valid_char(uint8_t input){
     switch (input) {
-    case 'P' : // Pause
+    case 'P' : /* Pause */
     case 'p' :
-    case 'C' : // Continue
+    case 'C' : /* Continue */
     case 'c' :
-    case 'R' : // Move Right
+    case 'R' : /* Move Right */
     case 'r' :
-    case 'L' : // Move Left
+    case 'L' : /* Move Left */
     case 'l' :
-    case 'N' : // No Operation
+    case 'N' : /* No Operation */
     case 'n' :
-    case 'B' : // Reset
+    case 'B' : /* Reset */
     case 'b' :
-    case 'X' : // Cancel Command Entry
+    case 'X' : /* Cancel Command Entry */
     case 'x' :
-    case '\r' : // Attempt Command Entry
-    case 0x7F : // Backspace for deleting entered Character
+    case '\r' : /* Attempt Command Entry */
+    case 0x7F : /* Backspace for deleting entered Character */
         return 1;
     default :
         return 0;
     }
 }
 
-// Check if 100ms Have Passed and Check Recipe Process Block States to see if they
-// are in a Waiting or Servo Running State to Decrement Wait Time that has not
-// Passed
+/* Check if 100ms Have Passed and Check Recipe Process Block States to see if they
+ * are in a Waiting or Servo Running State to Decrement Wait Time that has not
+ * Passed
+ */
 void time_check(void){
     if (TIM1_Has_Ended()) {
         if ((proc1.p_state == waiting || proc1.p_state == servo_running) &&
@@ -153,8 +163,9 @@ void time_check(void){
     }
 }
 
-// Set LEDs for the Recipe Process Control Block Controlling the First Servo
-// on Channel 1
+/* Set LEDs for the Recipe Process Control Block Controlling the First Servo
+ * on Channel 1
+ */
 void set_LED_servo1(void){
     switch (proc1.d_state) {
     case is_running:
@@ -178,7 +189,7 @@ void set_LED_servo1(void){
     }
 }
 
-// Print Console Start Character
+/* Print Console Start Character */
 void console_print(void){
     USART_Write(USART2, (uint8_t *) ">", 1);
 }
